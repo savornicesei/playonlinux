@@ -1,0 +1,115 @@
+#!/bin/bash
+# Date : (2018-11-21)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# Installs Markdown Monster editor through PlayOnLinux/PlayOnMac
+#
+
+[ "$PLAYONLINUX" = "" ] && exit 0
+source "$PLAYONLINUX/lib/sources"
+
+PREFIX="EnterpriseArchitect"
+APP_TITLE="Enterprise Architect"
+APP_EDITOR="Sparx Systems"
+APP_URL="https://sparxsystems.com"
+SCRIPT_AUTHOR="Simona Avornicesei"
+
+#Initialization
+POL_GetSetupImages "https://sparxsystems.com/images/layout/banner/EA-logo-white.png" "https://sparxsystems.com/images/earose.png" "$APP_TITLE"
+POL_SetupWindow_Init
+       
+POL_Debug_Init
+       
+# Presentation
+POL_SetupWindow_presentation "$APP_TITLE" "$APP_EDITOR" "$APP_URL" "$SCRIPT_AUTHOR" "$PREFIX"
+ 
+# Create Prefix
+POL_Wine_SelectPrefix "$PREFIX"
+POL_Wine_PrefixCreate
+ 
+# Configuration
+#Set_OS "winxp" "sp2"
+ 
+#Dependencies
+####################################
+POL_Wine_InstallFonts
+POL_Call POL_Install_corefonts
+POL_Call POL_Install_msxml3
+POL_Call POL_Install_msxml4
+POL_Call POL_Install_msxml6
+POL_Call POL_Install_wsh57
+POL_Call POL_Install_mdac28
+
+#Additional goodies
+######################################
+
+# JET 4.0
+JET_INSTALLER="https://download.microsoft.com/download/4/3/9/4393c9ac-e69e-458d-9f6d-2fe191c51469/jet40sp8_9xnt.exe"
+JET_MD5="b060246cd499085a31f15873689d5fa7df817e407c8261a5c71fa6b9f7042560"
+JET_EXE="jet40sp8_9xnt.exe"
+POL_Download_Resource "$JET_INSTALLER" "$JET_MD5" "jet40"
+POL_Wine_WaitBefore "Jet 4.0 Service Pack 8 (SP8)"
+cd "$POL_USER_ROOT/ressources/jet40"
+POL_Wine --ignore-errors "$JET_EXE" /q /c:"install.exe /q"
+
+# SVN client
+SVN_CLIENT="Slik Subversion 1.9.7 (32-bit)"
+SVN_ZIP="https://sliksvn.com/pub/Slik-Subversion-1.9.7-win32.zip"
+SVN_EXE="Slik-Subversion-1.9.7-win32.msi"
+# -- Require that unzip is available
+if ! which unzip > /dev/null
+then
+    POL_Debug_Error "$(eval_gettext 'Missing required program: ')unzip"
+    return 1
+fi
+POL_Download_Resource "$SVN_ZIP" "" "svnzip"
+cd "$POL_USER_ROOT/ressources/svnzip"
+# Make sure the zip file actually contains the expected executable
+if ! unzip -l "$SVN_ZIP" "*$SVN_EXE" > /dev/null
+then
+    POL_Debug_Error "$(eval_gettext 'The given SVN client zip file does not contain the expected executable: ')$SVN_EXE"
+    return 1
+fi
+if ! unzip "$ZIP_FILE"
+then
+    POL_Debug_Error "$(eval_gettext 'Failed to unzip the SVN client file: ')$SVN_ZIP"
+    return 1
+fi
+POL_Wine_WaitBefore "$SVN_CLIENT"
+POL_Wine "$SVN_EXE" /SILENT
+POL_Wine_WaitExit "$SVN_CLIENT"
+
+#2007 Office System Driver: Data Connectivity Components 
+ODBC_MSO2007_URL="https://www.microsoft.com/en-us/download/details.aspx?id=23734"
+#Microsoft Access Database Engine 2016 Redistributable 
+ODBC_MSO2016_URL="https://www.microsoft.com/en-us/download/details.aspx?id=54920"
+#Microsoft® ODBC Driver 13.1 for SQL Server® - Windows, Linux, & macOS 
+ODBC_SQLSERVER_URL="https://www.microsoft.com/en-us/download/details.aspx?id=53339"
+#Oracle ODBC Driver Downloads
+ODBC_ORACLE_URL="https://www.oracle.com/technetwork/database/windows/downloads/utilsoft-098155.html"
+#MySQL Connector/ODBC 8.0.13 
+ODBC_MYSQL_URL="https://dev.mysql.com/downloads/connector/odbc/#downloads"
+#PostgreSQL ODBC driver
+ODBC_POSTGRESQL_URL="https://odbc.postgresql.org"
+
+ 
+####################################### 
+# Installation
+#######################################
+POL_System_TmpCreate "$PREFIX"
+cd "$POL_System_TmpDir"
+POL_Download "https://www.sparxsystems.com/bin/easetup.msi" ""
+
+POL_Wine_WaitBefore "$APP_TITLE"
+POL_Wine start msiexec /i "easetup.msi"
+POL_Wine_WaitExit "$APP_TITLE"
+ 
+# Create Shortcuts
+POL_Shortcut "MarkdownMonster.exe" "$APP_TITLE"
+
+POL_SetupWindow_Close
+
+exit 0

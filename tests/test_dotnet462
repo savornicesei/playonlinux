@@ -1,0 +1,55 @@
+#!/bin/bash
+# Date : (2018-11-22)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# test PlayOnLinux/PlayOnMac functions
+#
+
+[ "$PLAYONLINUX" = "" ] && exit 0
+source "$PLAYONLINUX/lib/sources"
+
+PREFIX="Test"
+APP_TITLE="Test .NET 4.6.2 install"
+APP_EDITOR="Simona Avornicesei"
+
+#Initialization
+POL_GetSetupImages "http://files.playonlinux.com/resources/setups/top.jpg" "http://files.playonlinux.com/playonlinux.jpg" "$APP_TITLE"
+POL_SetupWindow_Init
+       
+POL_Debug_Init
+       
+# Presentation
+POL_SetupWindow_presentation "$APP_TITLE" "$APP_EDITOR" "" "" "$PREFIX"
+ 
+# Create Prefix
+POL_Wine_SelectPrefix "$PREFIX"
+POL_Wine_PrefixCreate
+ 
+INSTALLER="NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+INSTALLER_MD5="9a5d647ee710af2b1aede329c40bbe1a"
+INSTALLER_URL="https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+
+POL_Wine_InstallFonts
+POL_Call POL_Install_corefonts
+
+# Install .NET 4.6.1
+POL_Call POL_Install_dotnet461
+
+Set_OS "win7"
+POL_Wine_OverrideDLL "native" "mscoree"
+
+# Creating Temp directory
+POL_Download_Resource "$INSTALLER_URL" "$INSTALLER_MD5" "dotnet462"
+   
+# Installing .NET 4.6.2
+POL_Wine_WaitBefore ".NET Framework 4.6.2"
+cd "$POL_USER_ROOT/ressources/dotnet462"
+POL_Wine --ignore-errors "$INSTALLER" /q /c:"install.exe /q"
+Set_OS "win7"
+
+POL_SetupWindow_Close
+
+exit 0

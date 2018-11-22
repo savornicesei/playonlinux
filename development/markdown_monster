@@ -1,0 +1,130 @@
+#!/bin/bash
+# Date : (2018-11-14)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# Installs Markdown Monster editor through PlayOnLinux/PlayOnMac
+#
+
+[ "$PLAYONLINUX" = "" ] && exit 0
+source "$PLAYONLINUX/lib/sources"
+
+PREFIX="MarkdownMonster"
+APP_TITLE="Markdown Monster"
+APP_EDITOR="Rich Strahl"
+APP_URL="https://markdownmonster.west-wind.com/"
+SCRIPT_AUTHOR="Simona Avornicesei"
+
+#Initialization
+POL_GetSetupImages "https://raw.githubusercontent.com/RickStrahl/MarkdownMonster/master/Install/WizBanner.bmp" "https://raw.githubusercontent.com/RickStrahl/MarkdownMonster/master/Install/WizIcon.bmp" "$APP_TITLE"
+POL_SetupWindow_Init
+       
+POL_Debug_Init
+       
+# Presentation
+POL_SetupWindow_presentation "$APP_TITLE" "$APP_EDITOR" "$APP_URL" "$SCRIPT_AUTHOR" "$PREFIX"
+ 
+# Create Prefix
+POL_Wine_SelectPrefix "$PREFIX"
+POL_Wine_PrefixCreate
+ 
+# Configuration
+#Set_OS "win7"
+ 
+#Dependencies
+####################################
+#POL_Call POL_Install_dotnet462
+####################################
+INSTALLER_462="NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+INSTALLER_462_MD5="9a5d647ee710af2b1aede329c40bbe1a"
+INSTALLER_462_URL="https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe"
+   
+POL_Wine_InstallFonts
+POL_Call POL_Install_wsh57
+
+# Removing mono
+POL_Debug_Message "Removing mono..."
+POL_Call POL_Remove_winemono
+  
+# Removing some leftover stuff that conflict with the installation
+POL_Debug_Message "Removing mscoree..."
+POL_Wine --ignore-errors reg delete "HKLM\Software\Microsoft\NET Framework Setup\NDP\v4" /f
+rm "$WINEPREFIX/drive_c/windows/system32/mscoree.dll"
+   
+# Dependencies, overrides, and Windows version settings
+#POL_Debug_Message "Installing .NET 4.0..."
+#Set_OS "winxp"
+#POL_Call POL_Install_dotnet40
+#Set_OS "win7"
+#POL_Debug_Message "Override mscoree..."
+#POL_Wine_OverrideDLL "native" "mscoree"
+#POL_Wine_OverrideDLL "" "mscorsvw.exe"
+#POL_Debug_Message "Installing .NET 4.5..."
+#POL_Call POL_Install_dotnet45
+
+POL_Debug_Message "Installing .NET 4.6.2..."  
+Set_OS "win7" "sp1" 
+POL_Wine_OverrideDLL "native" "mscoree"
+POL_Wine_OverrideDLL "native" "dnsapi"
+POL_Wine_OverrideDLL "" "mscorsvw.exe"
+# Creating Temp directory
+POL_Download_Resource "https://download.microsoft.com/download/F/9/4/F942F07D-F26F-4F30-B4E3-EBD54FABA377/NDP462-KB3151800-x86-x64-AllOS-ENU.exe" "9a5d647ee710af2b1aede329c40bbe1a" "dotnet462"
+   
+# Installing .NET 4.6.2
+POL_Wine_WaitBefore ".NET Framework 4.6.2"
+cd "$POL_USER_ROOT/ressources/dotnet462"
+POL_Wine --ignore-errors "$INSTALLER_462" /q /c:"install.exe /q"
+POL_Wine "$WINEPREFIX/drive_c/windows/Microsoft.NET/Framework/v4.0.30319/ngen.exe executequeueditems"
+
+#####################################
+#POL_Call POL_Install_IE11
+######################################
+# see https://support.microsoft.com/en-ca/help/18520/download-internet-explorer-11-offline-installer
+if [ "$POL_ARCH" == "amd64" ]
+then
+    INSTALLER_ie11="IE11-Windows6.1-x64-en-us.exe"
+    INSTALLER_ie11_MD5="839a1a4d5043d694cd324c33937e00ae"
+    INSTALLER_ie11_URL="http://download.microsoft.com/download/7/1/7/7179A150-F2D2-4502-9D70-4B59EA148EAA/IE11-Windows6.1-x64-en-us.exe"
+else
+    INSTALLER_ie11="IE11-Windows6.1-x86-en-us.exe"
+    INSTALLER_ie11_MD5="7d3479b9007f3c0670940c1b10a3615f"
+    INSTALLER_ie11_URL="http://download.microsoft.com/download/9/2/F/92FC119C-3BCD-476C-B425-038A39625558/IE11-Windows6.1-x86-en-us.exe"
+fi
+
+Set_OS "win7" "sp1"
+POL_Wine_OverrideDLL "native" "mscoree"
+POL_Wine_OverrideDLL "native" "dnsapi"
+POL_Wine_OverrideDLL "native" "mscorsvw"
+   
+# Creating Temp directory
+POL_Debug_Message "Downloading IE11 for $POL_ARCH arch..."
+POL_Download_Resource "$INSTALLER_ie11_URL" "$INSTALLER_ie11_MD5" "ie11"
+   
+# Installing IE 11
+POL_Debug_Message "Installing IE11..."
+POL_Wine_WaitBefore "Microsoft Internet Explorer 11"
+cd "$POL_USER_ROOT/ressources/ie11"
+POL_Wine --ignore-errors "$INSTALLER_ie11" /q /c:"install.exe /q"
+ 
+####################################### 
+# Installation
+#######################################
+POL_System_TmpCreate "$PREFIX"
+cd "$POL_System_TmpDir"
+POL_Download "https://west-wind.com/files/MarkdownMonsterSetup.exe" ""
+
+POL_Wine_WaitBefore "$APP_TITLE"
+POL_Wine "MarkdownMonsterSetup.exe" /SILENT
+POL_Wine_WaitExit "$APP_TITLE"
+#Set_OS "win10"
+
+POL_Wine_OverrideDLL_App "MarkdownMonster.exe" "native" "mscoree"
+ 
+# Create Shortcuts
+POL_Shortcut "MarkdownMonster.exe" "$APP_TITLE"
+
+POL_SetupWindow_Close
+
+exit 0

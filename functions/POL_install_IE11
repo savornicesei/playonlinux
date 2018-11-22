@@ -1,0 +1,37 @@
+#!/usr/bin/env playonlinux-bash
+# Date : (2018-11-14)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# Function to install Internet Explorer 11 32-bit or 64-bit through PlayOnLinux/PlayOnMac
+
+local INSTALLER_64bit="EIE11_EN-US_MCM_WIN764.EXE"
+local INSTALLER_64bit_MD5="487ace3149727607373440845adba50e"
+local INSTALLER_64bit_URL="https://download.microsoft.com/download/2/9/4/29413F94-2ACF-496A-AD9C-8F43598510B7/EIE11_EN-US_MCM_WIN764.EXE"
+
+local INSTALLER_32bit="EIE11_EN-US_MCM_WIN7.EXE"
+local INSTALLER_32bit_MD5="65948d0197151d3e1b50e92cd468c2d6"
+local INSTALLER_32bit_URL="https://download.microsoft.com/download/9/0/8/908B5C6B-F23E-4DED-9906-77CE4E9E8528/EIE11_EN-US_MCM_WIN7.EXE"
+
+Set_OS "win7"
+
+POL_Wine_InstallFonts
+POL_Call POL_Install_corefonts
+POL_Call POL_Install_wsh57
+   
+# Creating Temp directory
+POL_Debug_Message "Downloading IE11 for $POL_ARCH arch..."
+if [ "$POL_ARCH" == "amd64" ]
+then
+    POL_Download_Resource "$INSTALLER_64bit_URL" "$INSTALLER_32bit_MD5" "ie11"
+else
+    POL_Download_Resource "$INSTALLER_32bit_URL" "$INSTALLER_32bit_MD5" "ie11"
+fi
+   
+# Installing IE 11
+POL_Debug_Message "Installing IE11..."
+POL_Wine_WaitBefore "Microsoft Internet Explorer 11 ($POL_ARCH)"
+cd "$POL_USER_ROOT/ressources/ie11"
+POL_Wine --ignore-errors "$INSTALLER" /q /c:"install.exe /q"

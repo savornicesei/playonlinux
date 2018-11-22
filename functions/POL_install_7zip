@@ -1,0 +1,22 @@
+#!/usr/bin/env playonlinux-bash
+# Date : (2018-11-22)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# Function to install 7-zip through PlayOnLinux/PlayOnMac
+#
+   
+cd "$POL_System_TmpDir"
+if [ "$POL_ARCH" == "amd64" ]; then
+    POL_Download "https://www.7-zip.org/a/7z1805-x64.exe" "1deefe6649699946590856e901bbe5ff"
+    POL_Wine_WaitBefore "$TITLE"
+    POL_AutoWine "7z1805-x64.msi"
+else
+    POL_Download "https://www.7-zip.org/a/7z1805.exe" "80ccb79bceed759d69cc2f80be5eaaed"
+    POL_Wine_WaitBefore "$TITLE"
+    POL_Wine 7z1805.exe
+fi
+ 
+POL_System_TmpDelete

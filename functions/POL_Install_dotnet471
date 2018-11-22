@@ -1,0 +1,42 @@
+#!/usr/bin/env playonlinux-bash
+# Date : (2018-11-14)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.2.12
+#
+# Function to install .NET 4.7.1 through PlayOnLinux/PlayOnMac
+#
+   
+local INSTALLER="NDP471-KB4033342-x86-x64-AllOS-ENU.exe"
+local INSTALLER_MD5="660e1a104f209f3cdb55b6d4e9ffa475"
+local INSTALLER_URL="https://download.microsoft.com/download/9/E/6/9E63300C-0941-4B45-A0EC-0008F96DD480/NDP471-KB4033342-x86-x64-AllOS-ENU.exe"
+
+POL_Wine_InstallFonts
+POL_Call POL_Install_corefonts
+
+# Removing mono
+POL_Call POL_Remove_winemono
+  
+# Removing some leftover stuff that conflict with the installation
+POL_Wine --ignore-errors reg delete "HKLM\Software\Microsoft\NET Framework Setup\NDP\v4" /f
+rm "$WINEPREFIX/drive_c/windows/system32/mscoree.dll"
+   
+# Dependencies, overrides, and Windows version settings
+Set_OS "winxp"
+wineserver -k
+POL_Call POL_Install_dotnet40
+Set_OS "win7"
+POL_Wine_OverrideDLL "native" "mscoree"
+POL_Call POL_Install_dotnet45
+   
+Set_OS "win7" "sp1"
+
+# Creating Temp directory
+POL_Download_Resource "$INSTALLER_URL" "$INSTALLER_MD5" "dotnet471"
+   
+# Installing .NET 4.7.1
+POL_Wine_WaitBefore ".NET Framework 4.7.1"
+cd "$POL_USER_ROOT/ressources/dotnet471"
+POL_Wine --ignore-errors "$INSTALLER" /q /c:"install.exe /q"
+Set_OS "win7" "sp1"
