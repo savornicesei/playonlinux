@@ -4,7 +4,7 @@ My PlayOnLinux script collection
 ## Overview
 This repository contains some of the applications that I wanted to run on my (beautiful, gorgeous, amazing) Linux box. They're organized following the official Play On Linux software categories, except _tests_ folder.
 
-Scripts state as of 22 Nov. 2018:
+Scripts state as of 8 January 2019:
 
 | PlayOnLinux software category |         Script        |      Application     |  Status  | Notes                                                                                                              |
 |:-----------------------------:|:---------------------:|:--------------------:|:--------:|--------------------------------------------------------------------------------------------------------------------|
