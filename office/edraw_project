@@ -1,0 +1,104 @@
+#!/bin/bash
+# Date : (2019-01-08)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.3.3
+#
+# Installs Edraw Project through PlayOnLinux/PlayOnMac
+#
+
+[ "$PLAYONLINUX" = "" ] && exit 0
+source "$PLAYONLINUX/lib/sources"
+
+PREFIX="EdrawProject"
+APP_TITLE="Edraw Project"
+APP_EDITOR="EdrawSoft"
+APP_URL="https://www.edrawsoft.com/project/"
+SCRIPT_AUTHOR="Simona Avornicesei"
+
+#Initialization
+POL_GetSetupImages "https://www.edrawsoft.com/image/products/frame/logo.png" "https://www.edrawsoft.com/image/index/project.png" "$APP_TITLE"
+POL_SetupWindow_Init
+       
+POL_Debug_Init
+       
+# Presentation
+POL_SetupWindow_presentation "$APP_TITLE" "$APP_EDITOR" "$APP_URL" "$SCRIPT_AUTHOR" "$PREFIX"
+ 
+# Create Prefix
+POL_Wine_SelectPrefix "$PREFIX"
+POL_Wine_PrefixCreate
+
+#Configuration
+Set_OS "win10"
+ 
+#Dependencies
+####################################
+POL_Call POL_Install_corefonts
+POL_Call POL_Install_d3dx10
+POL_Call POL_Install_d3dx11
+POL_Call POL_Install_vcrun2013
+
+# Installing VC 140
+INSTALLER="vc_redist.x86.exe"
+INSTALLER_MD5="1a15e6606bac9647e7ad3caa543377cf"
+INSTALLER_URL="https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
+POL_Download_Resource "$INSTALLER_URL" "$INSTALLER_MD5" "vc140"
+POL_Debug_Message "Installing VC 140 32-bit..."
+POL_Wine_WaitBefore "Visual C++ x86 Redistributable for Visual Studio 2015"
+cd "$POL_USER_ROOT/ressources/vc140"
+POL_Wine "$INSTALLER" /q /c:"install.exe /q"  
+ 
+# DLL's configuration
+POL_Wine_OverrideDLL "native" "d3dx10_43" "d3dx11_43" "d3dx11_42" "d3dx9_36" "d3dx9_42" "d3dx9_43"
+
+POL_Debug_Message "Override dlls ..."
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-conio-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-heap-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-locale-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-math-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-runtime-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-stdio-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-time-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "atl140"
+POL_Wine_OverrideDLL "native,builtin" "concrt140"
+POL_Wine_OverrideDLL "native,builtin" "msvcp140"
+POL_Wine_OverrideDLL "native,builtin" "msvcr140"
+POL_Wine_OverrideDLL "native,builtin" "ucrtbase"
+POL_Wine_OverrideDLL "native,builtin" "vcomp140"
+POL_Wine_OverrideDLL "native,builtin" "vcruntime140"
+
+####################################### 
+# Installation
+#######################################
+EDRAWPRJ_URL="https://www.edrawsoft.com/archives/edrawprojectsetup.exe"
+EDRAWPRJ_SETUP="edrawprojectsetup.exe"
+EDRAWPRJ_EXE="EdrawProject.exe"
+
+# Download and extract Edraw Project
+POL_System_TmpCreate "$PREFIX"
+
+POL_SetupWindow_InstallMethod "LOCAL,DOWNLOAD"
+if [ "$INSTALL_METHOD" = "LOCAL" ]
+then
+    POL_SetupWindow_browse "$(eval_gettext 'Please select the setup file to run')" "$APP_TITLE"
+elif [ "$INSTALL_METHOD" = "DOWNLOAD" ]
+then
+    APP_ANSWER=$EDRAWPRJ_URL
+    cd "$POL_System_TmpDir"
+    POL_Download "$EDRAWPRJ_URL"
+fi
+
+POL_Wine_WaitBefore "$APP_TITLE"
+POL_Wine start /unix "$APP_ANSWER"
+POL_Wine_WaitExit "$APP_ANSWER"
+ 
+POL_System_TmpDelete
+ 
+# Create Shortcuts
+POL_Shortcut "$EDRAWPRJ_EXE" "$APP_TITLE"
+
+POL_SetupWindow_Close
+
+exit 0

@@ -11,12 +11,14 @@ Scripts state as of 22 Nov. 2018:
 | Development                   | enterprise_architect  | Enterprise Architect | untested |                                                                                                                    |
 |                               | markdown_monster      | Markdown Monster     | fails    | - requires at least .NET 4.6.2 (it's a WPF app) and I'm not confident that it installs properly.                   |
 |                               |                       |                      |          | - the app errors at startup because it cannot find some path.                                                      |
-| Graphics                      | balsamiq_mockups      | Balsamiq Mockups 3   | works    | - see https://www.playonlinux.com/en/topic-16110-Script_Balsamiq_Mockups.html                                      |
+| Graphics                      | balsamiq_mockups      | Balsamiq Mockups 3   | works    | - see https://www.playonlinux.com/en/topic-16110-Script_Balsamiq_Mockups.html   
+| Office                      | edraw_project      | Edraw Project   | fails    | - requires native VC++ 2015 redist                                    |
 | Functions                     | POL_install_7zip      | 7-zip v18.05         | works    | - kind of useless since the lib. has native version for linux.                                                     |
 |                               | POL_install_dotnet462 | .NET 4.6.2           | fails    | - .NET 3.5 installation enters infinite loop, see https://www.playonlinux.com/en/app-822-POL_Install_dotnet35.html |
 |                               |                       |                      |          | - during install it complains about mscorsvw.exe                                                                   |
 |                               | POL_install_dotnet471 | .NET 4.7.1           | fails    | - similar as for .NET 4.6.2                                                                                        |
 |                               | POL_install_IE11      | Internet Explorer 11 | untested |                                                                                                                    |
+|                               | POL_install_vcrun2015     | Visual C++ Redist. 2015 | fails | - the installer does not run; files need to be extracted and placed manually |
 
 The scripts from _tests_ folder are just a wrapper over the content of some of the functions so they can be tested locally by importing the test script into PlayOnLinux.
 

@@ -1,0 +1,82 @@
+#!/usr/bin/env playonlinux-bash
+# Date : (2010-01-08)
+# Distribution used to test : OpenSUSE Tumbleweed x64
+# Author : Simona Avornicesei
+# Licence : MIT
+# PlayOnLinux: 4.3.3
+#
+# test PlayOnLinux/PlayOnMac functions
+#
+
+[ "$PLAYONLINUX" = "" ] && exit 0
+source "$PLAYONLINUX/lib/sources"
+
+PREFIX="Test"
+APP_TITLE="Test VC++ 140 (2015) redist install"
+APP_EDITOR="Simona Avornicesei"
+
+#Initialization
+POL_GetSetupImages "http://files.playonlinux.com/resources/setups/top.jpg" "http://files.playonlinux.com/playonlinux.jpg" "$APP_TITLE"
+POL_SetupWindow_Init
+       
+POL_Debug_Init
+       
+# Presentation
+POL_SetupWindow_presentation "$APP_TITLE" "$APP_EDITOR" "" "" "$PREFIX"
+ 
+# Create Prefix
+POL_Wine_SelectPrefix "$PREFIX"
+POL_Wine_PrefixCreate
+ 
+INSTALLER="vc_redist.x86.exe"
+INSTALLER_MD5="1a15e6606bac9647e7ad3caa543377cf"
+INSTALLER_URL="https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe"
+   
+# Dependencies, overrides, and Windows version settings
+#This may fail in non-XP mode, see https://bugs.winehq.org/show_bug.cgi?id=37781
+
+POL_Debug_Message "Override dlls ..."
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-conio-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-heap-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-locale-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-math-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-runtime-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-stdio-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "api-ms-win-crt-time-l1-1-0"
+POL_Wine_OverrideDLL "native,builtin" "atl140"
+POL_Wine_OverrideDLL "native,builtin" "concrt140"
+POL_Wine_OverrideDLL "native,builtin" "msvcp140"
+POL_Wine_OverrideDLL "native,builtin" "msvcr140"
+POL_Wine_OverrideDLL "native,builtin" "ucrtbase"
+POL_Wine_OverrideDLL "native,builtin" "vcomp140"
+POL_Wine_OverrideDLL "native,builtin" "vcruntime140"
+
+Set_OS "winxp"
+
+# Creating Temp directory
+POL_Download_Resource "$INSTALLER_URL" "$INSTALLER_MD5" "vc140"
+   
+# Installing VC 140
+POL_Debug_Message "Installing VC 140 32-bit..."
+POL_Wine_WaitBefore "Visual C++ x86 Redistributable for Visual Studio 2015"
+cd "$POL_USER_ROOT/ressources/vc140"
+POL_Wine "$INSTALLER" /q /c:"install.exe /q"
+
+#Installing VS 140 for 64-bit
+if [ "$POL_ARCH" == "amd64" ]; then
+    POL_Debug_Message "Found 64-bit wine prefix. Installing VC 140 64-bit..."
+
+    INSTALLER="vc_redist.x64.exe"
+    INSTALLER_MD5="5eea714e1f22f1875c1cb7b1738b0c0b1f02aec5ecb95f0fdb1c5171c6cd93a3"
+    INSTALLER_URL="https://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe"
+
+    POL_Download_Resource "$INSTALLER_URL" "$INSTALLER_MD5" "vc140"
+
+    POL_Wine_WaitBefore "Visual C++ x64 Redistributable for Visual Studio 2015"
+    cd "$POL_USER_ROOT/ressources/vc140"
+    POL_Wine --ignore-errors "$INSTALLER" /q /c:"install.exe /q"
+fi
+
+POL_SetupWindow_Close
+
+exit 0
