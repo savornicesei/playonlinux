@@ -1,9 +1,9 @@
 #!/bin/bash
-# Date : (2018-11-22)
+# Date : (2020-04-29)
 # Distribution used to test : OpenSUSE Tumbleweed x64
 # Author : Simona Avornicesei
 # Licence : MIT
-# PlayOnLinux: 4.2.12
+# PlayOnLinux: 4.3.4
 #
 # Installs Balsamiq Mockups 3 through PlayOnLinux/PlayOnMac
 #
@@ -33,28 +33,11 @@ POL_Wine_PrefixCreate
 POL_System_TmpCreate "$PREFIX"
 cd "$POL_System_TmpDir"
  
-#Dependencies
-####################################
-#fonts
-#POL_Wine_InstallFonts
-#POL_Call POL_Install_corefonts
-#POL_Call POL_Install_tahoma2
-
-#more Google fonts
-#FONTS_GIT_URL="git://github.com/google/fonts.git"
-#if ! which git > /dev/null
-#then
-#    POL_Debug_Error "Missing git client"
-#    return 1
-#fi
-#git clone $FONTS_GIT_URL
-#find ./fonts -name '*.ttf' -print0 | xargs -0 cp -t $PREFIX/drive_c/Windows/Fonts/
- 
 ####################################### 
 # Installation
 #######################################
-BALSAMIQ_URL="https://builds.balsamiq.com/mockups-desktop/Balsamiq_Mockups_3.5.16_bundled.zip"
-BALSAMIQ_ZIP="Balsamiq_Mockups_3.5.16_bundled.zip"
+BALSAMIQ_URL="https://build_archives.s3.amazonaws.com/obsolete/mockups-desktop/3.5.17/Balsamiq_Mockups_3.5.17_bundled.zip"
+BALSAMIQ_ZIP="Balsamiq_Mockups_3.5.17_bundled.zip"
 BALSAMIQ_EXE="Balsamiq Mockups 3.exe"
 
 # Require that unzip is available
